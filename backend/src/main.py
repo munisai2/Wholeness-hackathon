@@ -1,17 +1,28 @@
-const express = require('express');
-const app = express();
-const port = process.env.PORT || 3000;
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+import os
+from dotenv import load_dotenv
 
-app.use(express.json());
+load_dotenv()
 
-app.get('/', (req, res) => {
-    res.send('Wholeness Backend API Running');
-});
+app = FastAPI()
 
-// Import Routes (Placeholder)
-// const foodRoutes = require('./routes/foodRoutes');
-// app.use('/api/food', foodRoutes);
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins for hackathon simplicity
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-app.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
-});
+@app.get("/")
+def read_root():
+    return {"message": "Wholeness Backend API Running (Python/FastAPI)"}
+
+from src.routes.food_routes import router as food_router
+app.include_router(food_router, prefix="/api/food", tags=["food"])
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=3000)
